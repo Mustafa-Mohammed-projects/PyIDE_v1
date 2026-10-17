@@ -19,6 +19,14 @@ _state = {"io": None, "tid": None, "site": None, "cache": None, "abi": "arm64_v8
 _console = None
 
 
+def _split(v):
+    """Kotlin passes argument lists as one string joined with \x01 (Java lists are not iterable here)."""
+    if v is None:
+        return []
+    v = str(v)
+    return v.split("\x01") if v else []
+
+
 def setup(site, cache, abi):
     _state.update(site=site, cache=cache, abi=abi.replace("-", "_"))
     os.makedirs(site, exist_ok=True)
@@ -240,12 +248,12 @@ def _execute(cb, target, argv, cwd):
 
 
 def run_file(path, cb, argv=None):
-    args = [path] + (list(argv) if argv is not None else [])
+    args = [path] + _split(argv)
     return _execute(cb, lambda: runpy.run_path(path, run_name="__main__"), args, os.path.dirname(path))
 
 
 def run_module(name, cb, argv=None, cwd=None):
-    args = [name] + (list(argv) if argv is not None else [])
+    args = [name] + _split(argv)
     return _execute(cb, lambda: runpy.run_module(name, run_name="__main__", alter_sys=True), args, cwd)
 
 
@@ -345,7 +353,7 @@ def _uninstall(name):
 
 
 def pip(args, cb):
-    args = [str(a) for a in args]
+    args = _split(args)
     with _redirect(cb):
         _state["tid"] = threading.get_ident()
         try:

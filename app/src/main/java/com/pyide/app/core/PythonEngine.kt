@@ -32,16 +32,16 @@ class PythonEngine(private val ctx: Context) {
     fun warmUp() { bridge.toString() }
 
     fun runFile(path: String, io: PyIO, argv: List<String> = emptyList()): Int =
-        bridge.callAttr("run_file", path, io, ArrayList(argv)).toInt()
+        bridge.callAttr("run_file", path, io, argv.joinToString("\u0001")).toInt()
 
     fun runModule(name: String, cwd: String, io: PyIO, argv: List<String>): Int =
-        bridge.callAttr("run_module", name, io, ArrayList(argv), cwd).toInt()
+        bridge.callAttr("run_module", name, io, argv.joinToString("\u0001"), cwd).toInt()
 
     fun runCode(code: String, cwd: String, io: PyIO): Int =
         bridge.callAttr("run_code", code, io, cwd).toInt()
 
     fun pip(args: List<String>, io: PyIO): Int =
-        bridge.callAttr("pip", ArrayList(args), io).toInt()
+        bridge.callAttr("pip", args.joinToString("\u0001"), io).toInt()
 
     fun replPush(line: String, io: PyIO): Boolean =
         bridge.callAttr("repl_push", line, io).toBoolean()
